@@ -27,7 +27,7 @@ ul {
 
 a {
   color: inherit;
-  text-decoration: none !important;
+  text-decoration: none
 }
 input{
   -webkit-appearance: none !important;

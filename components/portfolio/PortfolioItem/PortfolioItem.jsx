@@ -1,12 +1,17 @@
+import Link from 'next/link';
 import { Container } from './styles';
 
 const PortfolioItem = ({ portfolio }) => {
   return (
     <Container>
-      <h3>{portfolio.title}</h3>
-      <p>{portfolio.description}</p>
-      <span>{portfolio.jobTitle}</span>
-      <small>{portfolio.company}</small>
+      <Link href={`/portfolios/${portfolio._id}`}>
+        <a>
+          <h3>{portfolio.title}</h3>
+          <h5>{portfolio.description}</h5>
+          <p>{portfolio.jobTitle}</p>
+          <small>{portfolio.company}</small>
+        </a>
+      </Link>
     </Container>
   );
 };
