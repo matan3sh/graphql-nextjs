@@ -18,10 +18,13 @@ app.prepare().then(() => {
     type Portfolio {
       _id: ID
       title: String
-      content: String
+      company: String
+      companyWebsite: String
+      location: String
+      description: String
       jobTitle: String
-      daysOfExperience: Int
-      isCurrentlyEmployed: Boolean
+      startDate: String
+      endDate: String
     }
 
     type Query {
