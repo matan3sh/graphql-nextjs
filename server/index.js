@@ -3,30 +3,19 @@ const next = require('next');
 
 const graphqlHTTP = require('express-graphql').graphqlHTTP;
 const { buildSchema } = require('graphql');
+const { portfolioResolvers } = require('./graphql/resolvers');
+const { portfolioTypes } = require('./graphql/types');
 
 const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-const data = require('./data');
-
 app.prepare().then(() => {
   const server = express();
 
   const schema = buildSchema(`
-    type Portfolio {
-      _id: ID
-      title: String
-      company: String
-      companyWebsite: String
-      location: String
-      description: String
-      jobTitle: String
-      startDate: String
-      endDate: String
-    }
-
+    ${portfolioTypes}
     type Query {
       portfolios: [Portfolio]
       portfolio(id: ID): Portfolio
@@ -34,13 +23,7 @@ app.prepare().then(() => {
   `);
 
   const root = {
-    portfolio: ({ id }) => {
-      const portfolio = data.portfolios.find((p) => p._id === id);
-      return portfolio;
-    },
-    portfolios: () => {
-      return data.portfolios;
-    },
+    ...portfolioResolvers,
   };
 
   server.use(
