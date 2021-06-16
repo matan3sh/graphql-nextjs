@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+
+import { useLazyQuery } from '@apollo/client';
+import { GET_PORTFOLIOS } from 'apollo/queries';
 
 import { PortfolioList } from 'components/portfolio';
 
@@ -64,26 +67,17 @@ const addPortfolio = () => {
     .then((data) => data.createPortfolio);
 };
 
-const fetchPortfolios = () => {
-  const query = `
-  query Portfolios {
-    portfolios {
-      _id,
-      title,
-      company,
-      jobTitle
-      description
-    }
-  }
-  `;
-  return axios
-    .post('http://localhost:3000/graphql', { query })
-    .then(({ data: graph }) => graph.data)
-    .then((data) => data.portfolios);
-};
+const PortfoliosPage = () => {
+  const [portfolios, setPortfolios] = useState([]);
+  const [getPortfolios, { loading, data }] = useLazyQuery(GET_PORTFOLIOS);
 
-const PortfoliosPage = ({ data }) => {
-  const [portfolios, setPortfolios] = useState(data.portfolios);
+  useEffect(() => {
+    getPortfolios();
+  }, []);
+
+  if (data && data.portfolios.length > 0 && portfolios.length === 0)
+    setPortfolios(data.portfolios);
+  if (loading) return 'Loading...';
 
   const createPortfolio = async () => {
     const newPortfolio = await addPortfolio();
@@ -119,11 +113,6 @@ const PortfoliosPage = ({ data }) => {
       )}
     </Container>
   );
-};
-
-PortfoliosPage.getInitialProps = async () => {
-  const portfolios = await fetchPortfolios();
-  return { data: { portfolios } };
 };
 
 export default PortfoliosPage;
