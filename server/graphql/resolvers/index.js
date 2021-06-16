@@ -1,7 +1,7 @@
 const data = require('../../data');
 
-exports.portfolioResolvers = {
-  portfolio: ({ id }) => {
+exports.portfolioQueries = {
+  portfolio: (root, { id }) => {
     const portfolio = data.portfolios.find((p) => p._id === id);
     return portfolio;
   },
@@ -9,11 +9,21 @@ exports.portfolioResolvers = {
   portfolios: () => {
     return data.portfolios;
   },
+};
 
-  createPortfolio: ({ input }) => {
+exports.portfolioMutations = {
+  createPortfolio: (root, { input }) => {
     input._id = require('crypto').randomBytes(10).toString('hex');
     const newPortfolio = { ...input };
     data.portfolios.push(newPortfolio);
     return newPortfolio;
+  },
+
+  updatePortfolio: (root, { id, input }) => {
+    const index = data.portfolios.findIndex((p) => p._id === id);
+    const oldPortfolio = data.portfolios[index];
+    const updatedPortfolio = { ...oldPortfolio, ...input };
+    data.portfolios[index] = updatedPortfolio;
+    return updatedPortfolio;
   },
 };
