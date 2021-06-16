@@ -5,6 +5,18 @@ import { PortfolioList } from 'components/portfolio';
 
 import { Container, Actions } from 'styles';
 
+const removePortfolio = (id) => {
+  const query = `
+    mutation DeletePortfolio {
+      deletePortfolio(id:"${id}")
+    }
+  `;
+  return axios
+    .post('http://localhost:3000/graphql', { query })
+    .then(({ data: graph }) => graph.data)
+    .then((data) => data.deletePortfolio);
+};
+
 const editPortfolio = (id) => {
   const query = `
   mutation UpdatePortfolio {
@@ -87,6 +99,12 @@ const PortfoliosPage = ({ data }) => {
     setPortfolios(updatedPortfolios);
   };
 
+  const deletePortfolio = async (id) => {
+    await removePortfolio(id);
+    const updatedPortfolios = portfolios.filter((p) => p._id !== id);
+    setPortfolios(updatedPortfolios);
+  };
+
   return (
     <Container>
       <Actions>
@@ -96,6 +114,7 @@ const PortfoliosPage = ({ data }) => {
         <PortfolioList
           portfolios={portfolios}
           updatePortfolio={updatePortfolio}
+          deletePortfolio={deletePortfolio}
         />
       )}
     </Container>
