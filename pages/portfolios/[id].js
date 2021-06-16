@@ -1,18 +1,22 @@
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-import { useQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client';
 import { GET_PORTFOLIO } from 'apollo/queries';
 
 import { Container } from 'styles';
 
 const PortfolioPage = ({ query }) => {
-  const { loading, error, data } = useQuery(GET_PORTFOLIO, {
-    variables: { id: query.id },
-  });
+  const [portfolio, setPortfolio] = useState(null);
+  const [getPortfolio, { loading, data }] = useLazyQuery(GET_PORTFOLIO);
 
-  if (loading) return 'Loading...';
+  useEffect(() => {
+    getPortfolio({ variables: { id: query.id } });
+  }, []);
 
-  const portfolio = (data && data.portfolio) || {};
+  if (data && !portfolio) setPortfolio(data.portfolio);
+
+  if (loading || !portfolio) return 'Loading...';
 
   return (
     <Container>
