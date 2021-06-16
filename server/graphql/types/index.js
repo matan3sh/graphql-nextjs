@@ -10,4 +10,15 @@ exports.portfolioTypes = `
     startDate: String
     endDate: String
   }
+
+  input PortfolioInput {
+    title: String
+    company: String
+    companyWebsite: String
+    location: String
+    description: String
+    jobTitle: String
+    startDate: String
+    endDate: String
+  }
 `;
