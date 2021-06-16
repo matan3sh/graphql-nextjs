@@ -5,6 +5,26 @@ import { PortfolioList } from 'components/portfolio';
 
 import { Container, Actions } from 'styles';
 
+const editPortfolio = (id) => {
+  const query = `
+  mutation UpdatePortfolio {
+    updatePortfolio(id: "${id}",input: {
+      title:"Updated Job!!!"
+    }) {
+      _id,
+      title,
+      company,
+      jobTitle
+      description
+    }
+  }
+  `;
+  return axios
+    .post('http://localhost:3000/graphql', { query })
+    .then(({ data: graph }) => graph.data)
+    .then((data) => data.updatePortfolio);
+};
+
 const addPortfolio = () => {
   const query = `
   mutation CreatePortfolio {
@@ -59,12 +79,25 @@ const PortfoliosPage = ({ data }) => {
     setPortfolios(updatedPortfolios);
   };
 
+  const updatePortfolio = async (id) => {
+    const newPortfolio = await editPortfolio(id);
+    const updatedPortfolios = portfolios.map((p) =>
+      p._id === id ? newPortfolio : p
+    );
+    setPortfolios(updatedPortfolios);
+  };
+
   return (
     <Container>
       <Actions>
         <button onClick={createPortfolio}>Create Portfolio</button>
       </Actions>
-      {portfolios && <PortfolioList portfolios={portfolios} />}
+      {portfolios && (
+        <PortfolioList
+          portfolios={portfolios}
+          updatePortfolio={updatePortfolio}
+        />
+      )}
     </Container>
   );
 };
