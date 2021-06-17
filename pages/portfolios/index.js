@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { GET_PORTFOLIOS } from 'apollo/queries';
+import { CREATE_PORTFOLIO } from 'apollo/mutations';
 
 import { PortfolioList } from 'components/portfolio';
 
@@ -40,50 +41,33 @@ const editPortfolio = (id) => {
     .then((data) => data.updatePortfolio);
 };
 
-const addPortfolio = () => {
-  const query = `
-  mutation CreatePortfolio {
-    createPortfolio(input: {
-      title:"New Job"
-      company:"New Company"
-      companyWebsite:"New Website"
-      location: "New Location"
-      jobTitle:"new Job Title"
-      description:"New Desc"
-      startDate:"12/12/2020"
-      endDate:"12/06/2021"
-    }) {
-      _id,
-      title,
-      company,
-      jobTitle
-      description
-    }
-  }
-  `;
-  return axios
-    .post('http://localhost:3000/graphql', { query })
-    .then(({ data: graph }) => graph.data)
-    .then((data) => data.createPortfolio);
-};
-
 const PortfoliosPage = () => {
   const [portfolios, setPortfolios] = useState([]);
+
   const [getPortfolios, { loading, data }] = useLazyQuery(GET_PORTFOLIOS);
+
+  const [createPortfolio] = useMutation(CREATE_PORTFOLIO, {
+    update(cache, { data: { createPortfolio } }) {
+      const { portfolios } = cache.readQuery({ query: GET_PORTFOLIOS });
+      cache.writeQuery({
+        query: GET_PORTFOLIOS,
+        data: { portfolios: [...portfolios, createPortfolio] },
+      });
+    },
+  });
 
   useEffect(() => {
     getPortfolios();
   }, []);
 
-  if (data && data.portfolios.length > 0 && portfolios.length === 0)
+  if (
+    data &&
+    data.portfolios.length > 0 &&
+    (portfolios.length === 0 || data.portfolios.length !== portfolios.length)
+  )
     setPortfolios(data.portfolios);
-  if (loading) return 'Loading...';
 
-  const createPortfolio = async () => {
-    const newPortfolio = await addPortfolio();
-    const updatedPortfolios = [...portfolios, newPortfolio];
-    setPortfolios(updatedPortfolios);
-  };
+  if (loading) return 'Loading...';
 
   const updatePortfolio = async (id) => {
     const newPortfolio = await editPortfolio(id);
