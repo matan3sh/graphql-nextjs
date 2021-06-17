@@ -26,6 +26,8 @@ const removePortfolio = (id) => {
 const PortfoliosPage = () => {
   const { data } = useQuery(GET_PORTFOLIOS);
 
+  const [updatePortfolio] = useMutation(UPDATE_PORTFOLIO);
+
   const [createPortfolio] = useMutation(CREATE_PORTFOLIO, {
     update(cache, { data: { createPortfolio } }) {
       const { portfolios } = cache.readQuery({ query: GET_PORTFOLIOS });
@@ -35,13 +37,6 @@ const PortfoliosPage = () => {
       });
     },
   });
-  // const [updatePortfolio] = useMutation(UPDATE_PORTFOLIO, {
-
-  // })
-
-  const updatePortfolio = async (id) => {
-    await editPortfolio(id);
-  };
 
   const deletePortfolio = async (id) => {
     await removePortfolio(id);

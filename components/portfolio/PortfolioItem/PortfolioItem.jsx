@@ -13,7 +13,11 @@ const PortfolioItem = ({ portfolio, updatePortfolio, deletePortfolio }) => {
       <p>{portfolio.jobTitle}</p>
       <small>{portfolio.company}</small>
       <Buttons>
-        <button onClick={() => updatePortfolio(portfolio._id)}>Update</button>
+        <button
+          onClick={() => updatePortfolio({ variables: { id: portfolio._id } })}
+        >
+          Update
+        </button>
         <button onClick={() => deletePortfolio(portfolio._id)}>Delete</button>
       </Buttons>
     </Container>
