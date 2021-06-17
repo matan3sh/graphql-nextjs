@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-import { useLazyQuery, useMutation } from '@apollo/client';
+import withApollo from 'apollo/withApollo';
+import { getDataFromTree } from '@apollo/client/react/ssr';
+
+import { useQuery, useMutation } from '@apollo/client';
 import { GET_PORTFOLIOS } from 'apollo/queries';
-import { CREATE_PORTFOLIO } from 'apollo/mutations';
+import { CREATE_PORTFOLIO, UPDATE_PORTFOLIO } from 'apollo/mutations';
 
 import { PortfolioList } from 'components/portfolio';
 
@@ -21,30 +23,8 @@ const removePortfolio = (id) => {
     .then((data) => data.deletePortfolio);
 };
 
-const editPortfolio = (id) => {
-  const query = `
-  mutation UpdatePortfolio {
-    updatePortfolio(id: "${id}",input: {
-      title:"Updated Job!!!"
-    }) {
-      _id,
-      title,
-      company,
-      jobTitle
-      description
-    }
-  }
-  `;
-  return axios
-    .post('http://localhost:3000/graphql', { query })
-    .then(({ data: graph }) => graph.data)
-    .then((data) => data.updatePortfolio);
-};
-
 const PortfoliosPage = () => {
-  const [portfolios, setPortfolios] = useState([]);
-
-  const [getPortfolios, { loading, data }] = useLazyQuery(GET_PORTFOLIOS);
+  const { data } = useQuery(GET_PORTFOLIOS);
 
   const [createPortfolio] = useMutation(CREATE_PORTFOLIO, {
     update(cache, { data: { createPortfolio } }) {
@@ -55,33 +35,19 @@ const PortfoliosPage = () => {
       });
     },
   });
+  // const [updatePortfolio] = useMutation(UPDATE_PORTFOLIO, {
 
-  useEffect(() => {
-    getPortfolios();
-  }, []);
-
-  if (
-    data &&
-    data.portfolios.length > 0 &&
-    (portfolios.length === 0 || data.portfolios.length !== portfolios.length)
-  )
-    setPortfolios(data.portfolios);
-
-  if (loading) return 'Loading...';
+  // })
 
   const updatePortfolio = async (id) => {
-    const newPortfolio = await editPortfolio(id);
-    const updatedPortfolios = portfolios.map((p) =>
-      p._id === id ? newPortfolio : p
-    );
-    setPortfolios(updatedPortfolios);
+    await editPortfolio(id);
   };
 
   const deletePortfolio = async (id) => {
     await removePortfolio(id);
-    const updatedPortfolios = portfolios.filter((p) => p._id !== id);
-    setPortfolios(updatedPortfolios);
   };
+
+  const portfolios = (data && data.portfolios) || [];
 
   return (
     <Container>
@@ -99,4 +65,4 @@ const PortfoliosPage = () => {
   );
 };
 
-export default PortfoliosPage;
+export default withApollo(PortfoliosPage, { getDataFromTree });

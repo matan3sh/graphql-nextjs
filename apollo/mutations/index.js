@@ -22,3 +22,15 @@ export const CREATE_PORTFOLIO = gql`
     }
   }
 `;
+
+export const UPDATE_PORTFOLIO = gql`
+  mutation UpdatePortfolio($id: ID) {
+    updatePortfolio(id: $id, input: { title: "Updated Job!!!" }) {
+      _id
+      title
+      company
+      jobTitle
+      description
+    }
+  }
+`;
