@@ -1,27 +1,17 @@
-import axios from 'axios';
-
 import withApollo from 'apollo/withApollo';
 import { getDataFromTree } from '@apollo/client/react/ssr';
 
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_PORTFOLIOS } from 'apollo/queries';
-import { CREATE_PORTFOLIO, UPDATE_PORTFOLIO } from 'apollo/mutations';
+import {
+  CREATE_PORTFOLIO,
+  UPDATE_PORTFOLIO,
+  DELETE_PORTFOLIO,
+} from 'apollo/mutations';
 
 import { PortfolioList } from 'components/portfolio';
 
 import { Container, Actions } from 'styles';
-
-const removePortfolio = (id) => {
-  const query = `
-    mutation DeletePortfolio {
-      deletePortfolio(id:"${id}")
-    }
-  `;
-  return axios
-    .post('http://localhost:3000/graphql', { query })
-    .then(({ data: graph }) => graph.data)
-    .then((data) => data.deletePortfolio);
-};
 
 const PortfoliosPage = () => {
   const { data } = useQuery(GET_PORTFOLIOS);
@@ -38,9 +28,18 @@ const PortfoliosPage = () => {
     },
   });
 
-  const deletePortfolio = async (id) => {
-    await removePortfolio(id);
-  };
+  const [deletePortfolio] = useMutation(DELETE_PORTFOLIO, {
+    update(cache, { data: { deletePortfolio } }) {
+      const { portfolios } = cache.readQuery({ query: GET_PORTFOLIOS });
+      const updatedPortfolios = portfolios.filter(
+        (p) => p._id !== deletePortfolio
+      );
+      cache.writeQuery({
+        query: GET_PORTFOLIOS,
+        data: { portfolios: updatedPortfolios },
+      });
+    },
+  });
 
   const portfolios = (data && data.portfolios) || [];
 
@@ -49,6 +48,7 @@ const PortfoliosPage = () => {
       <Actions>
         <button onClick={createPortfolio}>Create Portfolio</button>
       </Actions>
+
       {portfolios && (
         <PortfolioList
           portfolios={portfolios}

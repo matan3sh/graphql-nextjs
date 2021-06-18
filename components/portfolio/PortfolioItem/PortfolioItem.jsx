@@ -18,7 +18,11 @@ const PortfolioItem = ({ portfolio, updatePortfolio, deletePortfolio }) => {
         >
           Update
         </button>
-        <button onClick={() => deletePortfolio(portfolio._id)}>Delete</button>
+        <button
+          onClick={() => deletePortfolio({ variables: { id: portfolio._id } })}
+        >
+          Delete
+        </button>
       </Buttons>
     </Container>
   );
