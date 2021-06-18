@@ -3,15 +3,12 @@ import Link from 'next/link';
 import withApollo from 'apollo/withApollo';
 import { getDataFromTree } from '@apollo/client/react/ssr';
 
-import { useQuery } from '@apollo/client';
-import { GET_PORTFOLIO } from 'apollo/queries';
+import { useGetPortfolio } from 'apollo/actions';
 
 import { Container } from 'styles';
 
 const PortfolioPage = ({ query }) => {
-  const { data, loading, error } = useQuery(GET_PORTFOLIO, {
-    variables: { id: query.id },
-  });
+  const { data } = useGetPortfolio(query.id);
 
   const portfolio = (data && data.portfolio) || {};
 
